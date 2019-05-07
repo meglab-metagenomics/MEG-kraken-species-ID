@@ -7,6 +7,7 @@ The custom kraken database includes refseq's genomes for bacteria, archaea, and 
 
 Please reach out if you'd like access to the custom database:edoster@colostate.edu.
 We are currently working on an automated script for creating the custom database and will be added soon.
+https://github.com/colostatemeg/meglab-kraken-custom-db
 
 ## Example command:
 nextflow main.nf --reads "PATH/to/files/*_R{1,2}_001.fastq.gz " --kraken_db $krakendir --output $outputDir --threads 1 -w $workingDIR --host $HOSTFASTA -profile local -species "Salmonella enterica"
