@@ -70,10 +70,7 @@ Channel
     .fromFilePairs( params.reads, flat: true )
     .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
     .set { reads }
-Channel
-    .fromFilePairs( params.reads, flat: true )
-    .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
-    .set { reads }
+
 
 process RunMetaphlan2 {
     tag { sample_id }
@@ -83,11 +80,11 @@ process RunMetaphlan2 {
        set sample_id, file(forward), file(reverse) from reads
 
     output:
-       set sample_id, file("${sample_id}.metaphlan2.profile.txt") into metaphlan2_profile
+       file("${sample_id}.metaphlan2.profile.txt") into metaphlan2_profile
 
 
     """
-    metaphlan2.py ${forward},${reverse} --input_type fastq --nproc ${threads} > ${sample_id}.metaphlan2.profile.txt
+    metaphlan2.py ${forward},${reverse} --bowtie2out ${sample_id}.bowtie2.bz2 --input_type fastq --nproc ${threads} > ${sample_id}.metaphlan2.profile.txt
     """
 }
 
@@ -102,10 +99,12 @@ process MergeMetaphlanResults {
         file(meta2_profiles) from metaphlan2_l_to_w
 
     output:
-        file("merged_metaphlan2_abundance_table.csv") into metaphlan2_master_matrix
+        file("merged_metaphlan2_abundance_table.txt") into metaphlan2_master_matrix
+        file("merged_metaphlan2_abundance_table_species.txt") into metaphlan2_species_matrix    
 
     """
-    merge_metaphlan_tables.py ${meta2_profiles} > merged_metaphlan2_abundance_table.txt
+    merge_metaphlan_tables.py *profile.txt > merged_metaphlan2_abundance_table.txt
+    grep -E "(s__)|(^ID)" merged_abundance_table.txt | grep -v "t__" | sed 's/^.*s__//g' > merged_abundance_table_species.txt
     """
 }
 
